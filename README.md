@@ -247,15 +247,25 @@ Update database credentials in:
 src/main/resources/application.properties
 ```
 
-Current local config expects:
+Configuration is read from environment variables with development defaults:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/mini_s3
-spring.datasource.username=root
-spring.datasource.password=shaunak123
+DB_URL=jdbc:mysql://localhost:3306/mini_s3
+DB_USERNAME=root
+DB_PASSWORD=your_mysql_password
+JWT_SECRET=replace-with-a-long-random-secret
+JWT_EXPIRATION=86400000
 ```
 
-For production or GitHub sharing, these values should be moved to environment variables.
+On PowerShell, set them before running the app:
+
+```powershell
+$env:DB_PASSWORD="your_mysql_password"
+$env:JWT_SECRET="replace-with-a-long-random-secret"
+.\mvnw.cmd spring-boot:run
+```
+
+Do not commit real database passwords or production JWT secrets.
 
 ### Run Tests
 
