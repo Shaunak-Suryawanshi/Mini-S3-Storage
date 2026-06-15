@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
@@ -20,13 +21,14 @@ public class LocalStorageService implements StorageService {
 
     @Override
     public String store(String bucketName, MultipartFile file) {
-        String originalFileName = StringUtils.cleanPath(
-                file.getOriginalFilename() == null ? "uploaded-file" : file.getOriginalFilename()
-        );
+        String originalFileName = sanitizeFileName(file);
         String objectKey = bucketName + "/" + UUID.randomUUID() + "-" + originalFileName;
 
         try {
             Path targetPath = STORAGE_ROOT.resolve(objectKey).normalize();
+            if (!targetPath.startsWith(STORAGE_ROOT)) {
+                throw new RuntimeException("Invalid file path");
+            }
             Files.createDirectories(targetPath.getParent());
             file.transferTo(targetPath);
             return objectKey;
@@ -59,5 +61,11 @@ public class LocalStorageService implements StorageService {
         } catch (IOException exception) {
             throw new RuntimeException("Failed to delete file");
         }
+    }
+
+    private String sanitizeFileName(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename() == null ? "uploaded-file" : file.getOriginalFilename();
+        String fileNameOnly = Paths.get(originalFilename).getFileName().toString();
+        return StringUtils.cleanPath(fileNameOnly);
     }
 }

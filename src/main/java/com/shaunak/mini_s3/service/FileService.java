@@ -6,6 +6,7 @@ import com.shaunak.mini_s3.entity.Bucket;
 import com.shaunak.mini_s3.entity.DownloadEvent;
 import com.shaunak.mini_s3.entity.FileMetadata;
 import com.shaunak.mini_s3.entity.User;
+import com.shaunak.mini_s3.exception.BadRequestException;
 import com.shaunak.mini_s3.exception.ResourceNotFoundException;
 import com.shaunak.mini_s3.repository.BucketRepository;
 import com.shaunak.mini_s3.repository.DownloadEventRepository;
@@ -14,6 +15,7 @@ import com.shaunak.mini_s3.repository.UserRepository;
 import com.shaunak.mini_s3.service.storage.StorageService;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -42,6 +44,8 @@ public class FileService {
     }
 
     public FileResponse uploadFile(Long bucketId, MultipartFile file, String ownerEmail) {
+        validateUpload(file);
+
         User owner = userRepository.findByEmail(ownerEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
 
@@ -187,5 +191,16 @@ public class FileService {
         }
 
         return bucket;
+    }
+
+    private void validateUpload(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("File is required and cannot be empty");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        if (!StringUtils.hasText(originalFilename)) {
+            throw new BadRequestException("File name is required");
+        }
     }
 }

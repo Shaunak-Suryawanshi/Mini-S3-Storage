@@ -14,7 +14,7 @@ public class CreateBucketRequest {
     @Size(min = 3, max = 63, message = "Bucket name must be between 3 and 63 characters")
     @Pattern(
             regexp = "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
-            message = "Bucket name must contain only lowercase letters, numbers, and hyphens"
+            message = "Bucket name must start and end with a lowercase letter or number and contain only lowercase letters, numbers, and hyphens"
     )
     private String bucketName;
 
